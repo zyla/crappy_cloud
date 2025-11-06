@@ -8,39 +8,86 @@ This is a satirical web visualization project that animates flying clouds and te
 
 ## Running the Project
 
-Simply open `index.html` in a web browser. No build process, dependencies, or server required.
+**Simple (no dev server)**:
+Simply open `index.html` in a web browser.
+
+**With dev server** (for testing):
+```bash
+npm install          # Install dependencies (first time only)
+npm run serve        # Start dev server at http://localhost:3000
+```
 
 ## Architecture
 
-The project consists of a single `index.html` file containing:
-- Embedded CSS for styling and animations
-- Embedded JavaScript for dynamic element spawning
-- Reference to `crappy_cloud_1.png` asset
+The project now uses a **modular architecture** for testability:
 
-### Core Systems
+### File Structure
+```
+├── index.html              # Main HTML file with CSS and module imports
+├── src/
+│   ├── main.js            # Application entry point
+│   ├── cloudAnimator.js   # Cloud animation system
+│   ├── buzzwordAnimator.js # Buzzword animation system
+│   └── utils.js           # Utility functions (randomization)
+├── __tests__/
+│   ├── *.test.js          # Unit tests (Jest)
+│   └── e2e/               # E2E tests (Playwright)
+├── index.html.original     # Original single-file version
+└── TESTING.md             # Comprehensive testing guide
+```
 
-**Cloud Animation System** (lines 70-96)
-- Clones the base cloud image element
-- Randomizes scale (0.5-2.5x), opacity, rotation, and vertical position
-- Applies either 'left' or 'right' animation (flying across screen)
+### Core Classes
+
+**CloudAnimator** (`src/cloudAnimator.js`)
+- Manages cloud element lifecycle
+- Clones base cloud image, applies random transforms
+- Randomizes scale (0.5-2.5x), opacity, rotation, vertical position
+- Spawns clouds with 'left' or 'right' animation
 - Self-regulates spawn rate based on active cloud count
-- Auto-removes clouds after animation completes
+- Auto-removes elements after `animationend` event
 
-**Buzzword Animation System** (lines 103-123)
-- Spawns h1 elements with random buzzwords from the array (line 101)
-- Applies one of 5 'buzz' animations (buzz0-buzz4) with varying effects:
-  - Simple horizontal movement with rotation
-  - Spinning transformations
-  - Scaling effects
-- Continuously respawns new buzzwords after each animation ends
+**BuzzwordAnimator** (`src/buzzwordAnimator.js`)
+- Manages buzzword element lifecycle
+- Creates h1 elements with random buzzwords
+- Applies one of 5 'buzz' animations (buzz0-buzz4)
+- Continuously respawns after animations complete
 
-### Key Implementation Notes
+**Utils** (`src/utils.js`)
+- Pure functions for random number generation
+- Testable, mockable randomization logic
 
-- Uses `animationend` event listeners to clean up DOM elements and prevent memory leaks
-- Spawn timing uses randomization multiplied by active element count to create organic pacing
-- CSS animations use `transform` for GPU-accelerated performance
-- Character encoding intentionally set to "wtf-8" (line 2) as part of the satirical nature
+### Key Implementation Details
+
+- **Memory leak prevention**: `animationend` listeners clean up DOM elements
+- **ES6 modules**: Uses modern JavaScript with imports/exports
+- **GPU acceleration**: CSS `transform` animations for performance
+- **Exposed debugging**: `window.cloudAnimator` and `window.buzzwordAnimator` available in console
+
+## Testing
+
+The project has comprehensive test coverage. See `TESTING.md` for full details.
+
+### Quick Commands
+```bash
+npm test                 # Run unit tests
+npm run test:watch       # Unit tests in watch mode
+npm run test:coverage    # Generate coverage report
+npm run test:e2e         # Run E2E tests (visual + memory leak detection)
+npm run test:e2e:ui      # Interactive E2E test runner
+npm run test:all         # Run all tests
+```
+
+### Test Strategy
+- **Unit tests** (Jest): Test animation logic, element creation, randomization
+- **E2E tests** (Playwright): Test visual behavior in real browser
+- **Memory leak tests**: Verify elements are cleaned up over time (critical!)
+
+Memory leak testing is **essential** for this project due to continuous element spawning.
 
 ## Modifying Content
 
-To add/modify buzzwords, edit the `buzzwords` array at line 101.
+To add/modify buzzwords, edit the `buzzwords` array in `src/main.js`.
+
+## Legacy Version
+
+The original single-file version is preserved as `index.html.original`.
